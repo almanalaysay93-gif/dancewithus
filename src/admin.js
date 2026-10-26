@@ -1,4 +1,4 @@
-// Admin console: sign up (with the admin code), sign in, create and edit classes,
+// Admin console for the single admin: sign in, create and edit classes,
 // and view each class's registrations. All data lives in the Sheet via Code.gs.
 import { api, formatDate, formatTimeRange } from "./api.js";
 
@@ -6,14 +6,9 @@ const TOKEN_KEY = "stepfit-admin-token";
 const $ = (sel, root = document) => root.querySelector(sel);
 
 const messages = {
-  name: "Enter your name.",
-  email: "Enter a valid email.",
-  password: "Use at least 8 characters.",
-  code: "That admin code isn't right.",
-  exists: "There's already an admin with that email. Sign in instead.",
-  login: "Email or password is wrong.",
+  login: "Username or password is wrong.",
   locked: "Too many tries. Wait 10 minutes, then sign in again.",
-  "signup-disabled": "Admin sign-up is off. Set ADMIN_SIGNUP_CODE in the Apps Script project first.",
+  "login-disabled": "Admin sign-in is off. Set ADMIN_PASSWORD in the Apps Script project first.",
   auth: "Your session ended. Sign in again.",
   busy: "The sheet is busy. Try again in a moment.",
   "not-found": "That class no longer exists. Reload the list.",
@@ -112,61 +107,30 @@ function signOut(message) {
   alertMsg(message || "");
 }
 
-function selectTab(which) {
-  ["login", "signup"].forEach((name) => {
-    const tab = $(`#tab-${name}`);
-    const on = name === which;
-    tab.setAttribute("aria-selected", String(on));
-    tab.tabIndex = on ? 0 : -1;
-    $(`#${name}`).hidden = !on;
-  });
-}
-
 function bindAuth() {
-  const tabs = [$("#tab-login"), $("#tab-signup")];
-  tabs.forEach((tab, i) => {
-    tab.addEventListener("click", () => selectTab(tab.getAttribute("aria-controls")));
-    tab.addEventListener("keydown", (e) => {
-      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-      const next = tabs[(i + 1) % 2];
-      selectTab(next.getAttribute("aria-controls"));
-      next.focus();
-    });
+  const form = $("#login");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearErrors(form);
+    alertMsg("");
+    const missing = [...form.querySelectorAll("[required]")].filter((input) => !input.value.trim());
+    missing.forEach((input) => setError(form, input, "Required."));
+    if (missing.length) return missing[0].focus();
+
+    const button = $("[type=submit]", form);
+    busy(button, true, "Signing in…");
+    const result = await call("login", Object.fromEntries(new FormData(form)));
+    busy(button, false, "Sign in");
+    if (result.ok) {
+      token = result.token;
+      write(TOKEN_KEY, token);
+      form.reset();
+      showDash(result.admin);
+      return;
+    }
+    $(".form-status", form).textContent = messages[result.error] || messages.network;
+    form.elements.password.select();
   });
-
-  for (const id of ["login", "signup"]) {
-    const form = $(`#${id}`);
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearErrors(form);
-      alertMsg("");
-      const data = Object.fromEntries(new FormData(form));
-      const missing = [...form.querySelectorAll("[required]")].filter((input) => !input.value.trim());
-      missing.forEach((input) => setError(form, input, "Required."));
-      if (missing.length) return missing[0].focus();
-
-      const button = $("[type=submit]", form);
-      const label = button.textContent;
-      busy(button, true, "Please wait…");
-      const result = await call(id, data);
-      busy(button, false, label);
-      if (result.ok) {
-        token = result.token;
-        write(TOKEN_KEY, token);
-        form.reset();
-        showDash(result.admin);
-        return;
-      }
-      const input = $(`[name="${result.error}"]`, form);
-      if (input) {
-        setError(form, input, messages[result.error]);
-        input.focus();
-      } else {
-        const status = $(".form-status", form);
-        status.textContent = messages[result.error] || messages.network;
-      }
-    });
-  }
 }
 
 // ---------- classes ----------

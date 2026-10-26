@@ -4,19 +4,20 @@
  *
  * One-time deploy:
  * 1. Open the sheet → Extensions → Apps Script. Replace the default code with this file. Save.
- * 2. Project Settings → Script Properties → add ADMIN_SIGNUP_CODE with a secret only
- *    your admins know. Admin sign-up is refused until it is set.
+ * 2. Project Settings → Script Properties → add ADMIN_PASSWORD (the admin's password).
+ *    It lives only in the script's private properties, never in this public repo.
+ *    Admin sign-in is refused until it is set. The single admin's username is ADMIN_USERNAME.
  * 3. Deploy → New deployment → Web app. Execute as: Me. Who has access: Anyone.
  * 4. Copy the /exec URL into src/config.js as scriptUrl, then rebuild the site.
  *
- * Tabs (Classes, Registrations, Admins) are created on first use. The two Nov 4
+ * Tabs (Classes, Registrations) are created on first use. The two Nov 4
  * classes are seeded into Classes. To free a spot, set that registration's
  * status cell to Cancelled. To hide a class from the public page, set it to closed.
  */
 var SHEET_ID = "1EyY901FlPETvalRF3HXb3BkseQy84E6FTZ46YTCX4Uw";
 var TZ = "Asia/Manila";
 var SESSION_SECONDS = 21600; // 6 h, the CacheService maximum
-var HASH_ROUNDS = 1000;
+var ADMIN_USERNAME = "alai";
 var MAX_LOGIN_FAILS = 5;
 var STATUSES = ["open", "full", "closed"];
 var sheetTz_ = TZ; // set from the spreadsheet on first access
@@ -24,7 +25,6 @@ var sheetTz_ = TZ; // set from the spreadsheet on first access
 var TABS = {
   Classes: ["id", "title", "date", "start", "end", "location", "price", "capacity", "status", "updatedAt"],
   Registrations: ["timestamp", "classId", "name", "mobile", "email", "status"],
-  Admins: ["email", "name", "salt", "hash", "createdAt"],
 };
 
 var VENUE = "Faith's, Lapu2 Ext, Digos City (near Emcor)";
@@ -56,8 +56,6 @@ function handle_(d) {
         return { ok: true, classes: listClasses_(false) };
       case "register":
         return register_(d);
-      case "signup":
-        return signup_(d);
       case "login":
         return login_(d);
       case "logout":
@@ -129,53 +127,32 @@ function register_(d) {
 
 // ---------- admin ----------
 
-function signup_(d) {
-  var code = PropertiesService.getScriptProperties().getProperty("ADMIN_SIGNUP_CODE");
-  if (!code) return err_("signup-disabled");
-  if (String(d.code || "") !== code) return err_("code");
-  var name = cleanName_(d.name);
-  var email = cleanEmail_(d.email);
-  var password = String(d.password || "");
-  if (!name) return err_("name");
-  if (!email) return err_("email");
-  if (password.length < 8 || password.length > 128) return err_("password");
-
-  return locked_(function () {
-    if (findAdmin_(email)) return err_("exists");
-    var salt = Utilities.getUuid();
-    tab_("Admins").appendRow(text_([email, name, salt, hash_(salt, password), now_()]));
-    return session_(email, name);
-  });
-}
-
 function login_(d) {
-  var email = cleanEmail_(d.email);
-  var password = String(d.password || "");
+  var password = PropertiesService.getScriptProperties().getProperty("ADMIN_PASSWORD");
+  if (!password) return err_("login-disabled");
   var cache = CacheService.getScriptCache();
-  var key = "f:" + email;
-  var fails = Number(cache.get(key) || 0);
+  var fails = Number(cache.get("f:admin") || 0);
   if (fails >= MAX_LOGIN_FAILS) return err_("locked");
-  var admin = email ? findAdmin_(email) : null;
-  if (!admin || hash_(admin.salt, password) !== admin.hash) {
-    cache.put(key, String(fails + 1), 600);
+  var username = String(d.username || "").trim().toLowerCase();
+  if (!same_(username, ADMIN_USERNAME) || !same_(String(d.password || ""), password)) {
+    cache.put("f:admin", String(fails + 1), 600);
     return err_("login");
   }
-  cache.remove(key);
-  return session_(admin.email, admin.name);
+  cache.remove("f:admin");
+  return session_();
 }
 
-function session_(email, name) {
+function session_() {
   var token = Utilities.getUuid() + Utilities.getUuid().replace(/-/g, "");
-  CacheService.getScriptCache().put("s:" + token, email, SESSION_SECONDS);
-  return { ok: true, token: token, admin: { email: email, name: name } };
+  CacheService.getScriptCache().put("s:" + token, ADMIN_USERNAME, SESSION_SECONDS);
+  return { ok: true, token: token, admin: { name: ADMIN_USERNAME } };
 }
 
 function withAdmin_(d, fn) {
   var token = String(d.token || "");
-  var email = token ? CacheService.getScriptCache().get("s:" + token) : null;
-  var admin = email ? findAdmin_(email) : null;
-  if (!admin) return err_("auth");
-  return fn({ email: admin.email, name: admin.name });
+  var user = token ? CacheService.getScriptCache().get("s:" + token) : null;
+  if (user !== ADMIN_USERNAME) return err_("auth");
+  return fn({ name: ADMIN_USERNAME });
 }
 
 function saveClass_(c) {
@@ -307,12 +284,6 @@ function findClass_(id) {
   })[0];
 }
 
-function findAdmin_(email) {
-  return records_("Admins").filter(function (a) {
-    return a.email.toLowerCase() === email;
-  })[0];
-}
-
 function locked_(fn) {
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(8000)) return err_("busy");
@@ -329,12 +300,13 @@ function now_() {
   return Utilities.formatDate(new Date(), TZ, "yyyy-MM-dd HH:mm:ss");
 }
 
-function hash_(salt, password) {
-  var value = salt + ":" + password;
-  for (var i = 0; i < HASH_ROUNDS; i++) {
-    value = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, value + salt, Utilities.Charset.UTF_8));
+// Compares every character so the reply time doesn't reveal how much of a guess matched.
+function same_(a, b) {
+  var diff = a.length ^ b.length;
+  for (var i = 0; i < Math.max(a.length, b.length); i++) {
+    diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
   }
-  return value;
+  return diff === 0;
 }
 
 // A leading apostrophe stores each value as literal text: Sheets won't turn "18:00" into a

@@ -83,29 +83,6 @@ button.btn {
 .auth {
   margin-top: 8px;
 }
-.tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin: 0 0 1.4rem;
-  border: 3px solid var(--navy);
-  border-radius: 999px;
-  overflow: hidden;
-}
-.tabs [role="tab"] {
-  min-height: 46px;
-  border: 0;
-  background: transparent;
-  font: inherit;
-  font-weight: 900;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: var(--navy);
-  cursor: pointer;
-}
-.tabs [aria-selected="true"] {
-  background: var(--navy);
-  color: var(--yellow);
-}
 .field input[type="email"],
 .field input[type="password"],
 .field input[type="date"],
@@ -122,17 +99,6 @@ button.btn {
   color: var(--ink);
   width: 100%;
 }
-.field label small {
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 700;
-}
-.hint {
-  margin: 0;
-  font-size: 0.8rem;
-  opacity: 0.8;
-}
-
 /* dashboard */
 .dash__head {
   display: flex;

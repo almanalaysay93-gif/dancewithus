@@ -2,7 +2,9 @@
 // so the browser can read Apps Script's JSON reply without a preflight.
 import { STEPFIT } from "./config.js";
 
-const endpoint = STEPFIT.scriptUrl || (import.meta.env.DEV ? "/api" : "");
+// Dev uses the local copy of Code.gs (/api) so testing never writes to the real Sheet.
+// Run `VITE_LIVE_API=1 npm run dev` to develop against the live web app instead.
+const endpoint = import.meta.env.DEV && !import.meta.env.VITE_LIVE_API ? "/api" : STEPFIT.scriptUrl;
 
 export async function api(action, data = {}) {
   if (!endpoint) return { ok: false, error: "offline" };

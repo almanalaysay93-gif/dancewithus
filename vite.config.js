@@ -12,7 +12,7 @@ const localAppsScript = {
     const gas = createGas({
       codePath: here("./apps-script/Code.gs"),
       dataPath: here("./dev/.data/sheets.json"),
-      props: { ADMIN_SIGNUP_CODE: process.env.STEPFIT_ADMIN_CODE || "stepfit-dev" },
+      props: { ADMIN_PASSWORD: process.env.STEPFIT_ADMIN_PASSWORD || "stepfit-dev" },
     });
     server.middlewares.use("/api", (req, res) => {
       let body = "";
