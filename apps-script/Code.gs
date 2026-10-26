@@ -19,6 +19,7 @@ var SESSION_SECONDS = 21600; // 6 h, the CacheService maximum
 var HASH_ROUNDS = 1000;
 var MAX_LOGIN_FAILS = 5;
 var STATUSES = ["open", "full", "closed"];
+var sheetTz_ = TZ; // set from the spreadsheet on first access
 
 var TABS = {
   Classes: ["id", "title", "date", "start", "end", "location", "price", "capacity", "status", "updatedAt"],
@@ -118,7 +119,7 @@ function register_(d) {
       );
     });
     if (dup) return { ok: false, error: "duplicate", left: cls.left };
-    tab_("Registrations").appendRow([now_(), classId, safe_(name), mobile, email, "Reserved"]);
+    tab_("Registrations").appendRow(text_([now_(), classId, name, mobile, email, "Reserved"]));
     cls.booked += 1;
     cls.left -= 1;
     if (cls.left === 0) cls.status = "full";
@@ -142,7 +143,7 @@ function signup_(d) {
   return locked_(function () {
     if (findAdmin_(email)) return err_("exists");
     var salt = Utilities.getUuid();
-    tab_("Admins").appendRow([email, safe_(name), salt, hash_(salt, password), now_()]);
+    tab_("Admins").appendRow(text_([email, name, salt, hash_(salt, password), now_()]));
     return session_(email, name);
   });
 }
@@ -197,17 +198,17 @@ function saveClass_(c) {
   return locked_(function () {
     var sheet = tab_("Classes");
     var id = String(c.id || "");
-    var row = [id, safe_(v.title), v.date, v.start, v.end, safe_(v.location), v.price, v.capacity, v.status, now_()];
+    var row = [id, v.title, v.date, v.start, v.end, v.location, v.price, v.capacity, v.status, now_()];
     if (id) {
       var existing = records_("Classes").filter(function (r) {
         return r.id === id;
       })[0];
       if (!existing) return err_("not-found");
-      sheet.getRange(existing._row, 1, 1, row.length).setValues([row]);
+      sheet.getRange(existing._row, 1, 1, row.length).setValues([text_(row)]);
     } else {
       id = "c" + Utilities.getUuid().replace(/-/g, "").slice(0, 10);
       row[0] = id;
-      sheet.appendRow(row);
+      sheet.appendRow(text_(row));
     }
     return { ok: true, cls: findClass_(id) };
   });
@@ -229,6 +230,7 @@ function registrations_(classId) {
 
 function tab_(name) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
+  sheetTz_ = ss.getSpreadsheetTimeZone();
   var sheet = ss.getSheetByName(name);
   if (sheet) return sheet;
   sheet = ss.insertSheet(name);
@@ -239,7 +241,7 @@ function tab_(name) {
   sheet.setFrozenRows(1);
   if (name === "Classes") {
     SEED_CLASSES.forEach(function (r) {
-      sheet.appendRow(r.concat([now_()]));
+      sheet.appendRow(text_(r.concat([now_()])));
     });
   }
   return sheet;
@@ -260,7 +262,8 @@ function records_(name) {
 function cell_(value, key) {
   if (Object.prototype.toString.call(value) === "[object Date]") {
     var fmt = key === "start" || key === "end" ? "HH:mm" : key === "date" ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm:ss";
-    return Utilities.formatDate(value, TZ, fmt);
+    // Sheets parsed this cell as a date/time in the spreadsheet's zone; read it back in that zone.
+    return Utilities.formatDate(value, sheetTz_, fmt);
   }
   return value === null || value === undefined ? "" : String(value);
 }
@@ -334,9 +337,12 @@ function hash_(salt, password) {
   return value;
 }
 
-// A leading = + - @ would make Sheets treat user text as a formula.
-function safe_(text) {
-  return /^[=+\-@]/.test(text) ? "'" + text : text;
+// A leading apostrophe stores each value as literal text: Sheets won't turn "18:00" into a
+// time, drop a mobile's leading 0, or run user input that starts with = as a formula.
+function text_(values) {
+  return values.map(function (v) {
+    return "'" + String(v);
+  });
 }
 
 function cleanText_(value, min, max) {

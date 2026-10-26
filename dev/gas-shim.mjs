@@ -21,6 +21,8 @@ export function createGas({ codePath, dataPath, props = {} }) {
 
   function services() {
     const db = load();
+    // Sheets stores a leading apostrophe as "this is text" and doesn't return it.
+    const unquote = (v) => (typeof v === "string" && v.startsWith("'") ? v.slice(1) : v);
     const sheet = (name) => {
       const rows = db[name];
       return {
@@ -28,7 +30,7 @@ export function createGas({ codePath, dataPath, props = {} }) {
         setFrozenRows() {},
         getDataRange: () => ({ getValues: () => rows.map((r) => r.slice()) }),
         appendRow(row) {
-          rows.push(row.slice());
+          rows.push(row.map(unquote));
           save(db);
         },
         getRange: (row, col) => ({
@@ -38,7 +40,7 @@ export function createGas({ codePath, dataPath, props = {} }) {
           setValues(values) {
             values.forEach((vals, i) => {
               rows[row - 1 + i] ??= [];
-              vals.forEach((v, j) => (rows[row - 1 + i][col - 1 + j] = v));
+              vals.forEach((v, j) => (rows[row - 1 + i][col - 1 + j] = unquote(v)));
             });
             save(db);
           },
@@ -46,6 +48,7 @@ export function createGas({ codePath, dataPath, props = {} }) {
       };
     };
     const spreadsheet = {
+      getSpreadsheetTimeZone: () => "Asia/Manila",
       getSheetByName: (name) => (db[name] ? sheet(name) : null),
       insertSheet(name) {
         db[name] = [];
