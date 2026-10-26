@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Step Fit with Drei — Beginner-friendly step class, Digos City</title>
+    <meta
+      name="description"
+      content="Step Fit with Drei: a beginner-friendly step aerobics class at Faith's, Lapu2 Ext, Digos City. Nov 4, 2026 · ₱170 inclusive of stepper · 40 heads per class."
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2314205a%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 font-weight=%22900%22 text-anchor=%22middle%22 fill=%22%23ffe600%22 font-family=%22Arial Black%22%3ES%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Montserrat:ital,wght@0,600;0,800;0,900;1,800&family=Permanent+Marker&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" as="image" href="/img/drei.webp" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <script>
+      // Hide intro targets before first paint; main.js reveals them. Fallback if JS never runs.
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.documentElement.classList.add("intro");
+        setTimeout(() => document.documentElement.classList.remove("intro"), 3000);
+      }
+    </script>
+  </head>
+  <body>
+    <!-- shared paint filters: rough edges for type, dry-brush for plates -->
+    <svg class="sr-defs" aria-hidden="true" focusable="false">
+      <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="4" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <filter id="dry" x="-10%" y="-30%" width="120%" height="160%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02 0.1" numOctaves="3" seed="9" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G" result="d" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.003 0.3" numOctaves="2" seed="2" result="b" />
+        <feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -9 6.6" result="mask" />
+        <feComposite in="d" in2="mask" operator="in" />
+      </filter>
+    </svg>
+
+    <a class="skip" href="#reserve">Skip to class details</a>
+
+    <header class="nav">
+      <a class="nav__logo" href="#top" aria-label="Step Fit with Drei, back to top">Step<span>Fit</span></a>
+      <a class="nav__cta" href="#reserve">Reserve</a>
+    </header>
+
+    <main>
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero__bg" aria-hidden="true">
+          <video
+            class="hero__video"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            poster="/video/hero-poster.jpg"
+          >
+            <source src="/video/hero-loop.mp4" type="video/mp4" />
+          </video>
+          <div class="hero__wash"></div>
+        </div>
+
+        <div class="hero__inner">
+          <div class="hero__copy">
+            <p class="kicker" data-intro="kicker">Move · Sweat · Smile <span aria-hidden="true">☺</span></p>
+
+            <h1 class="title" id="hero-title">
+              <svg class="title__plate" viewBox="0 0 600 420" preserveAspectRatio="none" aria-hidden="true">
+                <path
+                  d="M30 90 C 160 40, 420 20, 580 60 L 560 220 C 420 200, 260 230, 90 260 L 70 400 C 260 360, 420 380, 520 350"
+                  fill="none"
+                  stroke="#14205a"
+                  stroke-width="170"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  filter="url(#dry)"
+                />
+              </svg>
+              <span class="title__step" data-intro="stomp">Step</span>
+              <span class="title__row">
+                <span class="title__fit" data-intro="stomp">Fit</span>
+                <span class="title__with" data-intro="ink"><small>with</small> Drei</span>
+              </span>
+            </h1>
+
+            <p class="tag tag--magenta" data-intro="pop">Beginner friendly!</p>
+
+            <ul class="facts" data-intro="card" aria-label="Class details">
+              <li>
+                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                <span><strong>Nov 4, 2026</strong> Wednesday</span>
+              </li>
+              <li>
+                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                <span><strong>6–7PM</strong> Class 1 · <s>7–8PM</s> <em class="full">Class 2 full</em></span>
+              </li>
+              <li>
+                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                <span><strong>Faith's</strong> Lapu2 Ext, Digos City (near Emcor)</span>
+              </li>
+              <li>
+                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 14.3c3.4-.6 6.5 1.6 6.5 5.7"/></svg>
+                <span><strong>40 heads</strong> per class · first come, first serve</span>
+              </li>
+            </ul>
+
+            <div class="cta" data-intro="card">
+              <a class="btn" href="#reserve">Reserve a slot</a>
+              <p class="price"><strong>₱170</strong> <span>inclusive of stepper</span></p>
+            </div>
+          </div>
+
+          <div class="hero__stage">
+            <p class="quote" data-depth="1.6" data-intro="ink">Small steps.<br />Big changes!</p>
+            <div class="drei-wrap" data-depth="0.6">
+            <div class="drei">
+              <img
+                class="drei__img"
+                src="/img/drei.webp"
+                width="669"
+                height="1191"
+                alt="Coach Drei smiling with arms open, one foot on a step platform, wearing a neon Zumba outfit"
+                fetchpriority="high"
+              />
+            </div>
+            </div>
+            <ul class="benefits" aria-label="What you get">
+              <li class="b b--1" data-depth="1.2"><span data-intro="pop">Burn calories</span></li>
+              <li class="b b--2" data-depth="2"><span data-intro="pop">Improve stamina</span></li>
+              <li class="b b--3" data-depth="1.5"><span data-intro="pop">Boost mood</span></li>
+              <li class="b b--4" data-depth="2.4"><span data-intro="pop">Have fun!</span></li>
+            </ul>
+            <div class="sticker-wrap" data-depth="2.8"><p class="sticker" data-intro="pop">Let's <b>step</b> it up!</p></div>
+          </div>
+        </div>
+
+        <a class="scroll-cue" href="#reserve" aria-label="Scroll to class details"><span></span></a>
+      </section>
+
+      <section class="reserve" id="reserve" aria-labelledby="reserve-title">
+        <h2 id="reserve-title">Pick your class</h2>
+        <p class="reserve__lede">Your stepper is included — just bring water and a towel.</p>
+        <!-- Static fallback; register.js replaces it with the live classes from the Sheet. -->
+        <div class="slots" id="slots" aria-live="polite">
+          <article class="slot">
+            <h3>Class 1</h3>
+            <p class="slot__date">Wednesday, Nov 4, 2026</p>
+            <p class="slot__time">6–7PM</p>
+            <p>₱170 · 40 spots · first come, first serve</p>
+          </article>
+          <article class="slot slot--full">
+            <h3>Class 2</h3>
+            <p class="slot__date">Wednesday, Nov 4, 2026</p>
+            <p class="slot__time">7–8PM</p>
+            <p>Fully booked. See you next session!</p>
+            <span class="btn btn--off" aria-disabled="true">Full</span>
+          </article>
+        </div>
+
+        <div class="panel" id="register">
+          <h3 class="panel__title">Save your spot</h3>
+          <p class="panel__lede">Your name, mobile and email go on the list. Pay when you arrive. The stepper is included.</p>
+
+          <p id="closed" class="closed" hidden>Every class is full right now. Check back for the next session!</p>
+          <div id="done" class="done" hidden>
+            <h3 id="done-title" tabindex="-1">You're on the list! <span aria-hidden="true">☺</span></h3>
+            <p id="done-detail"></p>
+            <p id="done-pay"></p>
+          </div>
+
+          <form id="signup" novalidate>
+            <p id="form-status" class="form-status" tabindex="-1" role="alert"></p>
+            <div class="field">
+              <label for="name">Full name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required maxlength="80" placeholder="Your name" />
+              <p class="field-error" id="name-error"></p>
+            </div>
+            <div class="field">
+              <label for="mobile">Mobile number</label>
+              <input id="mobile" name="mobile" type="tel" inputmode="tel" autocomplete="tel" required placeholder="0917 123 4567" />
+              <p class="field-error" id="mobile-error"></p>
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254" placeholder="you@example.com" />
+              <p class="field-error" id="email-error"></p>
+            </div>
+            <fieldset class="choices">
+              <legend>Class</legend>
+              <div id="class-options">
+                <label class="choice">
+                  <input type="radio" name="classId" value="nov4-6pm" checked />
+                  <span><strong>6–7PM</strong> Class 1 · Wed, Nov 4 · open</span>
+                </label>
+                <label class="choice is-full">
+                  <input type="radio" name="classId" value="nov4-7pm" disabled />
+                  <span><strong>7–8PM</strong> Class 2 · Wed, Nov 4 · full</span>
+                </label>
+              </div>
+              <p class="field-error" id="class-error"></p>
+            </fieldset>
+            <div class="field">
+              <label class="check" for="attend">
+                <input id="attend" name="attend" type="checkbox" required />
+                <span>I can attend the class I picked and will pay at the venue.</span>
+              </label>
+              <p class="field-error" id="attend-error"></p>
+            </div>
+            <div class="hp" aria-hidden="true">
+              <label for="company">Company</label>
+              <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+            </div>
+            <button class="btn btn--block" type="submit">Save my spot</button>
+            <p class="fine">Spots are first come, first serve. When a class is full, it closes.</p>
+          </form>
+          <noscript>
+            <p class="fine">JavaScript is off, so this page can't save your name. Come to Faith's on Wednesday, Nov 4, 2026, 6–7PM. ₱170, stepper included.</p>
+          </noscript>
+        </div>
+        <p class="signoff">See you there! <span aria-hidden="true">☺</span> <em>Fit body, happy you.</em></p>
+        <p class="admin-link"><a href="/admin.html">Admin</a></p>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

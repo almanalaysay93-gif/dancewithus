@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* StepFit palette, sampled from the flyer */
+      :root {
+        --paper: #fffbea;
+        --yellow: #ffe600;
+        --cyan: #1ec3f0;
+        --magenta: #ff2e88;
+        --navy: #14205a;
+        --lime: #d7f24a;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--paper); }
+      .layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #halftone {
+        background-image: radial-gradient(var(--cyan) 22%, transparent 23%);
+        background-size: 28px 28px;
+        opacity: 0.16;
+      }
+      .dot { position: absolute; border-radius: 50%; }
+    </style>
+  </head>
+  <body>
+    <!-- 6 s loop at 120 BPM: 12 beats, every tween returns to its frame-0 state -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="6" data-width="1920" data-height="1080">
+      <div id="halftone" class="layer clip" data-start="0" data-duration="6" data-track-index="0"></div>
+
+      <svg id="strokes" class="layer clip" data-start="0" data-duration="6" data-track-index="1" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="brush" x="-10%" y="-30%" width="120%" height="160%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.016 0.08" numOctaves="3" seed="7" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="42" xChannelSelector="R" yChannelSelector="G" result="d" />
+            <!-- bristle streaks: long horizontal noise thresholded into dry-brush gaps -->
+            <feTurbulence type="fractalNoise" baseFrequency="0.002 0.22" numOctaves="2" seed="3" result="b" />
+            <feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -9 6.2" result="mask" />
+            <feComposite in="d" in2="mask" operator="in" />
+          </filter>
+        </defs>
+        <g filter="url(#brush)" stroke-linecap="round" fill="none" transform="rotate(-11 960 540)">
+          <!-- resident strokes: breathe and drift -->
+          <path id="s-cyan" d="M-260 170 C 300 120, 900 250, 1500 150 S 2050 110, 2200 140" stroke="#1ec3f0" stroke-width="150" />
+          <path id="s-yellow" d="M-240 520 C 360 430, 980 600, 1560 470 S 2000 430, 2180 460" stroke="#ffe600" stroke-width="230" />
+          <path id="s-magenta" d="M-280 930 C 300 870, 860 1010, 1380 900 S 1900 840, 2200 880" stroke="#ff2e88" stroke-width="150" />
+          <path id="s-navy" d="M-200 700 C 200 660, 520 760, 820 700" stroke="#14205a" stroke-width="110" />
+          <path id="s-navy2" d="M1300 330 C 1600 300, 1900 360, 2200 320" stroke="#14205a" stroke-width="80" />
+          <!-- swipes: paint on, wipe off, each hidden at both loop ends -->
+          <path id="w-lime" pathLength="1" d="M-200 330 C 500 290, 1100 380, 2150 320" stroke="#d7f24a" stroke-width="80" stroke-dasharray="1 1" stroke-dashoffset="1" />
+          <path id="w-cyan" pathLength="1" d="M2150 760 C 1400 800, 800 700, -200 770" stroke="#1ec3f0" stroke-width="70" stroke-dasharray="1 1" stroke-dashoffset="1" />
+        </g>
+      </svg>
+
+      <div id="splats" class="layer clip" data-start="0" data-duration="6" data-track-index="2">
+        <div id="d1" class="dot" style="left:180px;top:140px;width:46px;height:46px;background:#ff2e88"></div>
+        <div id="d2" class="dot" style="left:1720px;top:300px;width:34px;height:34px;background:#14205a"></div>
+        <div id="d3" class="dot" style="left:920px;top:980px;width:58px;height:58px;background:#ffe600"></div>
+        <div id="d4" class="dot" style="left:1480px;top:90px;width:26px;height:26px;background:#1ec3f0"></div>
+        <div id="d5" class="dot" style="left:320px;top:720px;width:30px;height:30px;background:#14205a"></div>
+        <div id="d6" class="dot" style="left:1820px;top:940px;width:44px;height:44px;background:#ff2e88"></div>
+      </div>
+    </div>
+    <script>
+      const BEAT = 0.5;
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "sine.inOut" } });
+
+      // resident strokes drift one way for 3 s, back for 3 s
+      tl.to("#s-cyan", { x: 60, y: -14, duration: 3, yoyo: true, repeat: 1 }, 0);
+      tl.to("#s-yellow", { x: -80, y: 18, duration: 3, yoyo: true, repeat: 1 }, 0);
+      tl.to("#s-magenta", { x: 70, y: 10, duration: 3, yoyo: true, repeat: 1 }, 0);
+      tl.to("#s-navy", { x: 90, duration: 3, yoyo: true, repeat: 1 }, 0);
+      tl.to("#s-navy2", { x: -70, duration: 3, yoyo: true, repeat: 1 }, 0);
+
+      // swipes: snap on in under a beat, hold, wipe off forward
+      tl.to("#w-lime", { strokeDashoffset: 0, duration: 0.7, ease: "power3.out" }, 0.5)
+        .to("#w-lime", { strokeDashoffset: -1, duration: 0.6, ease: "power2.in" }, 2.5);
+      tl.to("#w-cyan", { strokeDashoffset: 0, duration: 0.7, ease: "power3.out" }, 3.5)
+        .to("#w-cyan", { strokeDashoffset: -1, duration: 0.6, ease: "power2.in" }, 5.3);
+
+      // splatters thump on every beat: 24 half-beats of yoyo = 6 s, ends at rest
+      tl.to(".dot", { scale: 1.35, duration: BEAT / 2, ease: "power2.out", yoyo: true, repeat: 23, stagger: 0 }, 0);
+
+      // halftone slides exactly one tile so the loop seam is invisible
+      tl.fromTo("#halftone", { backgroundPosition: "0px 0px" }, { backgroundPosition: "56px 28px", duration: 6, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

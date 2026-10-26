@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin — Step Fit with Drei</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2314205a%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2218%22 font-weight=%22900%22 text-anchor=%22middle%22 fill=%22%23ffe600%22 font-family=%22Arial Black%22%3ES%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Montserrat:ital,wght@0,600;0,800;0,900;1,800&family=Permanent+Marker&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/admin.css" />
+  </head>
+  <body class="admin">
+    <header class="admin-bar">
+      <a class="nav__logo" href="/" aria-label="Step Fit with Drei, public site">Step<span>Fit</span></a>
+      <span class="admin-bar__label">Admin</span>
+      <div class="admin-bar__who" id="who" hidden>
+        <span id="who-name"></span>
+        <button class="link-btn" type="button" id="logout">Sign out</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <p class="admin-alert" id="alert" role="alert" tabindex="-1" hidden></p>
+
+      <section class="panel auth" id="auth" hidden aria-label="Admin access">
+        <div class="tabs" role="tablist" aria-label="Admin access">
+          <button type="button" role="tab" id="tab-login" aria-controls="login" aria-selected="true">Sign in</button>
+          <button type="button" role="tab" id="tab-signup" aria-controls="signup" aria-selected="false" tabindex="-1">Create admin account</button>
+        </div>
+
+        <form id="login" role="tabpanel" aria-labelledby="tab-login" novalidate>
+          <p class="form-status" role="alert"></p>
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input id="login-email" name="email" type="email" autocomplete="username" required />
+            <p class="field-error" id="login-email-error"></p>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required />
+            <p class="field-error" id="login-password-error"></p>
+          </div>
+          <button class="btn btn--block" type="submit">Sign in</button>
+        </form>
+
+        <form id="signup" role="tabpanel" aria-labelledby="tab-signup" novalidate hidden>
+          <p class="form-status" role="alert"></p>
+          <div class="field">
+            <label for="signup-name">Your name</label>
+            <input id="signup-name" name="name" type="text" autocomplete="name" required maxlength="80" />
+            <p class="field-error" id="signup-name-error"></p>
+          </div>
+          <div class="field">
+            <label for="signup-email">Email</label>
+            <input id="signup-email" name="email" type="email" autocomplete="email" required maxlength="254" />
+            <p class="field-error" id="signup-email-error"></p>
+          </div>
+          <div class="field">
+            <label for="signup-password">Password <small>(8+ characters)</small></label>
+            <input id="signup-password" name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="128" />
+            <p class="field-error" id="signup-password-error"></p>
+          </div>
+          <div class="field">
+            <label for="signup-code">Admin code</label>
+            <input id="signup-code" name="code" type="password" autocomplete="off" required />
+            <p class="hint">Ask the studio owner for the code. Without it, anyone could become an admin.</p>
+            <p class="field-error" id="signup-code-error"></p>
+          </div>
+          <button class="btn btn--block" type="submit">Create account</button>
+        </form>
+      </section>
+
+      <section class="dash" id="dash" hidden aria-labelledby="dash-title">
+        <div class="dash__head">
+          <h1 id="dash-title">Classes</h1>
+          <button class="btn" type="button" id="new-class">+ New class</button>
+        </div>
+        <div class="class-list" id="class-list" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <dialog class="editor" id="editor" aria-labelledby="editor-title">
+      <form id="class-form" method="dialog" novalidate>
+        <h2 id="editor-title">New class</h2>
+        <p class="form-status" role="alert"></p>
+        <input type="hidden" name="id" />
+        <div class="field">
+          <label for="f-title">Class name</label>
+          <input id="f-title" name="title" type="text" required maxlength="80" placeholder="Step Fit with Drei · Class 1" />
+          <p class="field-error" id="f-title-error"></p>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="f-date">Date</label>
+            <input id="f-date" name="date" type="date" required />
+            <p class="field-error" id="f-date-error"></p>
+          </div>
+          <div class="field">
+            <label for="f-start">Starts</label>
+            <input id="f-start" name="start" type="time" required />
+            <p class="field-error" id="f-start-error"></p>
+          </div>
+          <div class="field">
+            <label for="f-end">Ends</label>
+            <input id="f-end" name="end" type="time" required />
+            <p class="field-error" id="f-end-error"></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-location">Location</label>
+          <input id="f-location" name="location" type="text" required maxlength="120" placeholder="Faith's, Lapu2 Ext, Digos City (near Emcor)" />
+          <p class="field-error" id="f-location-error"></p>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="f-price">Price (₱)</label>
+            <input id="f-price" name="price" type="number" inputmode="numeric" min="0" max="100000" step="1" required />
+            <p class="field-error" id="f-price-error"></p>
+          </div>
+          <div class="field">
+            <label for="f-capacity">Spots</label>
+            <input id="f-capacity" name="capacity" type="number" inputmode="numeric" min="1" max="500" step="1" required />
+            <p class="field-error" id="f-capacity-error"></p>
+          </div>
+          <div class="field">
+            <label for="f-status">Status</label>
+            <select id="f-status" name="status">
+              <option value="open">Open</option>
+              <option value="full">Full</option>
+              <option value="closed">Closed (hidden)</option>
+            </select>
+            <p class="field-error" id="f-status-error"></p>
+          </div>
+        </div>
+        <div class="editor__actions">
+          <button class="link-btn" type="button" id="cancel-edit">Cancel</button>
+          <button class="btn" type="submit" id="save-class">Save class</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/admin.js"></script>
+  </body>
+</html>
