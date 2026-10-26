@@ -32,7 +32,9 @@ const localAppsScript = {
   },
 };
 
+// GitHub Pages serves this repo at /dancewithus/. Local dev and previews stay at /.
 export default defineConfig({
+  base: process.env.GITHUB_ACTIONS ? "/dancewithus/" : "/",
   plugins: [localAppsScript],
   build: {
     rollupOptions: {
